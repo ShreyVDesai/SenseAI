@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Interface</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>Chatbot</h1>
+        </div>
+        <div class="chat-box" id="chat-box">
+            <!-- Messages will be displayed here -->
+        </div>
+        <form id="chat-form">
+            <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+
+        chatForm.addEventListener('submit', function (e) {
+            e.preventDefault();  // Prevents form submission and page reload
+            const userMessage = userInput.value.trim();
+
+            if (userMessage) {
+                addMessage('user', userMessage);
+                fetch('/get_response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: userMessage })  // Send user input as JSON
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        addMessage('bot', data.response);  // Add bot's response to chat
+                    })
+                    .catch(error => {
+                        addMessage('bot', 'Error: Unable to get response.');
+                        console.error('Error:', error);  // Log error to the console
+                    });
+            }
+
+            userInput.value = '';  // Clear input field
+        });
+
+        function addMessage(sender, message) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.textContent = message;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;  // Auto-scroll to the latest message
+        }
+    </script>
+</body>
+
+</html>
