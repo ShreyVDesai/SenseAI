@@ -47,7 +47,7 @@
 # if __name__ == '__main__':
 #     app.run(debug=True)
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 import random
 import openai
 from dotenv import load_dotenv
@@ -67,6 +67,7 @@ load_dotenv()
 
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
+app.secret_key = 'abcdefg'
 
 # Predefined random responses for now
 random_responses = [
@@ -100,7 +101,7 @@ def record_audio_while_space():
         data = stream.read(CHUNK)
         frames.append(data)
 
-    print("Recording stopped.")
+    text_to_speech("Recording stopped.")
 
     stream.stop_stream()
     stream.close()
@@ -143,69 +144,98 @@ def text_to_speech(text):
 
 
 @app.route('/', methods=['GET', 'POST'])
-def chat():
+def chat(verbal = False):
+    session.clear()
     response = ""
-    if request.method == 'POST':
-        user_input = request.form['user_input']
+    # render_template('index.html', response=response)
+    text_to_speech("Press enter to switch to verbal mode")
+    time.sleep(1)
+    if verbal:
+        
+        handle_speech_interaction()
+        text_to_speech("Press enter to exit verbal mode")
+        time.sleep(1)
+        return render_template('index.html', response=response)
+            
+    else:
 
-        if USE_OPENAI:
-            try:
+        if request.method == 'POST':
+            user_input = request.form['user_input']
+            print(user_input)
+            # if USE_OPENAI:
+            #     try:
+            #         completion = openai.ChatCompletion.create(
+            #             model="gpt-3.5-turbo",
+            #             messages=[{"role": "user", "content": user_input}]
+            #         )
+            #         response = completion.choices[0].message['content']
+            #         text_to_speech(response)  # Read out the AI's response
+            #     except Exception as e:
+            #         response = f"Error: {e}"  # Handle errors gracefully
+            # else:
+            #     response = random.choice(random_responses)
+            #     text_to_speech(response)  # Read out the random response
+    # 
+    return render_template('index.html', response=response)
+
+def rerecorder():
+    text_to_speech("Recording")
+    record_audio_while_space()
+
+    # Transcribe the audio
+    transcribed_text = speech_to_text()
+
+    # Speak out the transcribed text for confirmation
+    text_to_speech(f"You said: {transcribed_text}. Press space to rerecord or wait 3 seconds to confirm.")
+    st = time.time()
+    while st-time.time()<3:
+        if keyboard.is_pressed("space"):
+            transcribed_text = rerecorder()
+    return transcribed_text
+
+# Function to handle recording, transcription, confirmation, and sending to the model
+def handle_speech_interaction():
+    
+    while True:
+        text_to_speech("Press and hold the spacebar to record")
+        # Wait for the spacebar to start recording
+        # print("Press and hold the spacebar to record...")
+        while not keyboard.is_pressed("space"):
+            time.sleep(0.1)
+
+        # Record audio while spacebar is pressed
+        # if keyboard.is_pressed("space"):
+        
+        
+        transcribed_text = rerecorder()
+        
+                
+                
+        # Allow 3 seconds for rerecording
+        # time.sleep(3)
+
+        text_to_speech(f"You have confirmed. Your request is being processed.")
+        if not keyboard.is_pressed("space"):
+            print("Confirmed: Sending to model...")
+            # Simulate sending the confirmed text to the Flask app
+            # with app.test_request_context('/'):
+            user_input = f"Describe the following in terms of its visual components. Be descriptive, but sensitive to the user's condition. The topic: {transcribed_text}"
+            if USE_OPENAI:
                 completion = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=[{"role": "user", "content": user_input}]
                 )
                 response = completion.choices[0].message['content']
-                text_to_speech(response)  # Read out the AI's response
-            except Exception as e:
-                response = f"Error: {e}"  # Handle errors gracefully
-        else:
-            response = random.choice(random_responses)
-            text_to_speech(response)  # Read out the random response
-
-    return render_template('index.html', response=response)
-
-# Function to handle recording, transcription, confirmation, and sending to the model
-def handle_speech_interaction():
-    text_to_speech("Press and hold the spacebar to record")
-    while True:
-        # Wait for the spacebar to start recording
-        # print("Press and hold the spacebar to record...")
-        while not keyboard.is_pressed("space"):
-            continue
-
-        # Record audio while spacebar is pressed
-        # if keyboard.is_pressed("space"):
-        record_audio_while_space()
-
-        # Transcribe the audio
-        transcribed_text = speech_to_text()
-
-        # Speak out the transcribed text for confirmation
-        text_to_speech(f"You said: {transcribed_text}. Press spacebar to rerecord or wait 3 seconds to confirm.")
-
-        # Allow 3 seconds for rerecording
-        time.sleep(3)
-
-        text_to_speech(f"You have confrmed. Your request is being processed.")
-        if not keyboard.is_pressed("space"):
-            print("Confirmed: Sending to model...")
-            # Simulate sending the confirmed text to the Flask app
-            with app.test_request_context('/'):
-                user_input = f"Describe the following to a blind person. Be descriptive, but sensitive to the user's condition. The topic: {transcribed_text}"
-                if USE_OPENAI:
-                    completion = openai.ChatCompletion.create(
-                        model="gpt-3.5-turbo",
-                        messages=[{"role": "user", "content": user_input}]
-                    )
-                    response = completion.choices[0].message['content']
-                    print("Model Response:", response)
-                    text_to_speech(response)
-                else:
-                    response = random.choice(random_responses)
-                    print("Random Response:", response)
-                    text_to_speech(response)
+                print("Model Response:", response)
+                text_to_speech(response)
+            else:
+                response = random.choice(random_responses)
+                print("Random Response:", response)
+                text_to_speech(response)
+        
+        return response
 
 if __name__ == '__main__':
     # Start the speech interaction in a separate thread
-    threading.Thread(target=handle_speech_interaction, daemon=True).start()
+    # threading.Thread(target=handle_speech_interaction, daemon=True).start()
     app.run(debug=True)

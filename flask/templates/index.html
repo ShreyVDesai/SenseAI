@@ -22,7 +22,7 @@
         </form>
     </div>
 
-    <script>
+    <!-- <script>
         const chatBox = document.getElementById('chat-box');
         const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
@@ -60,7 +60,68 @@
             chatBox.appendChild(messageElement);
             chatBox.scrollTop = chatBox.scrollHeight;  // Auto-scroll to the latest message
         }
+    </script> -->
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+    
+        chatForm.addEventListener('submit', function (e) {
+            e.preventDefault();  // Prevents form submission and page reload
+            const userMessage = userInput.value.trim();
+    
+            if (userMessage) {
+                sendMessage(userMessage, false);  // Regular message
+            }
+    
+            userInput.value = '';  // Clear input field
+        });
+    
+        // Add listener for the Enter key to send with verbal=True
+        userInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();  // Prevent default form submission
+                const userMessage = userInput.value.trim();
+    
+                if (userMessage) {
+                    sendMessage(userMessage, true);  // Send message with verbal=True
+                }
+    
+                userInput.value = '';  // Clear input field
+            }
+        });
+    
+        function sendMessage(message, verbal) {
+            addMessage('user', message);  // Add user's message to the chat box
+    
+            // Send the message to the server with the 'verbal' flag
+            fetch('/get_response', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message, verbal })  // Include verbal in request
+            })
+                .then(response => response.json())
+                .then(data => {
+                    addMessage('bot', data.response);  // Add bot's response to chat
+                })
+                .catch(error => {
+                    addMessage('bot', 'Error: Unable to get response.');
+                    console.error('Error:', error);  // Log error to the console
+                });
+        }
+    
+        function addMessage(sender, message) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.textContent = message;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;  // Auto-scroll to the latest message
+        }
     </script>
+    
 </body>
 
 </html>
