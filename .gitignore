@@ -1,2 +1,3 @@
 # .gitignore
 flask/.env
+test/.env
