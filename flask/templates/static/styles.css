@@ -1,0 +1,124 @@
+/* General Body Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 10px;
+    /* Added padding for better mobile responsiveness */
+}
+
+/* Chat Container */
+.chat-container {
+    width: 100%;
+    max-width: 450px;
+    /* Ensures it doesn't get too wide */
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Chat Header */
+.chat-header {
+    background-color: #0078d7;
+    /* High contrast blue for visibility */
+    color: #ffffff;
+    padding: 15px;
+    text-align: center;
+    font-size: 24px;
+}
+
+/* Chat Box */
+.chat-box {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    background-color: #f9f9f9;
+}
+
+/* Messages */
+.message {
+    padding: 10px 15px;
+    margin: 5px 0;
+    border-radius: 10px;
+    max-width: 75%;
+    font-size: 16px;
+    /* Ensure text is easily readable */
+}
+
+/* User's message */
+.message.user {
+    background-color: #0078d7;
+    /* Strong contrast for user's messages */
+    color: white;
+    margin-left: auto;
+}
+
+/* Bot's message */
+.message.bot {
+    background-color: #e0e0e0;
+    /* Light gray for bot responses */
+    color: black;
+    margin-right: auto;
+}
+
+/* Form Styling */
+form {
+    display: flex;
+    padding: 15px;
+    border-top: 1px solid #ddd;
+    background-color: #ffffff;
+}
+
+form input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #0078d7;
+    /* Higher visibility for input field */
+    border-radius: 4px;
+    margin-right: 10px;
+    font-size: 16px;
+    background-color: #ffffff;
+}
+
+/* Button Styling */
+form button {
+    padding: 12px;
+    background-color: #0078d7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+}
+
+/* Button Hover and Focus Effects */
+form button:hover {
+    background-color: #005bb5;
+}
+
+form button:focus {
+    outline: 3px solid #ffcc00;
+    /* Added focus style for accessibility */
+}
+
+/* Visually hidden elements for accessibility */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    overflow: hidden;
+}

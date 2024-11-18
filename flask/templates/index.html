@@ -4,104 +4,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot Interface</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Chatbot Interface - SenseAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="description" content="Accessible chatbot interface for blind and low vision users.">
 </head>
 
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <h1>Chatbot</h1>
+    <div class="chat-container" role="region" aria-labelledby="chat-header">
+        <div class="chat-header" id="chat-header">
+            <h1>Chatbot - SenseAI</h1>
         </div>
-        <div class="chat-box" id="chat-box">
+        <div class="chat-box" id="chat-box" role="log" aria-live="polite">
             <!-- Messages will be displayed here -->
         </div>
-        <form id="chat-form">
-            <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" required>
-            <button type="submit">Send</button>
+        <form id="chat-form" role="form">
+            <label for="user_input" class="visually-hidden">Type your message:</label>
+            <input type="text" name="user_input" id="user_input" placeholder="Type your message..." autocomplete="off"
+                required aria-labelledby="user_input_label">
+            <button type="submit" aria-label="Send message">Send</button>
         </form>
     </div>
-
-    <!-- <script>
-        const chatBox = document.getElementById('chat-box');
-        const chatForm = document.getElementById('chat-form');
-        const userInput = document.getElementById('user-input');
-
-        chatForm.addEventListener('submit', function (e) {
-            e.preventDefault();  // Prevents form submission and page reload
-            const userMessage = userInput.value.trim();
-
-            if (userMessage) {
-                addMessage('user', userMessage);
-                fetch('/get_response', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message: userMessage })  // Send user input as JSON
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        addMessage('bot', data.response);  // Add bot's response to chat
-                    })
-                    .catch(error => {
-                        addMessage('bot', 'Error: Unable to get response.');
-                        console.error('Error:', error);  // Log error to the console
-                    });
-            }
-
-            userInput.value = '';  // Clear input field
-        });
-
-        function addMessage(sender, message) {
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message', sender);
-            messageElement.textContent = message;
-            chatBox.appendChild(messageElement);
-            chatBox.scrollTop = chatBox.scrollHeight;  // Auto-scroll to the latest message
-        }
-    </script> -->
 
     <script>
         const chatBox = document.getElementById('chat-box');
         const chatForm = document.getElementById('chat-form');
-        const userInput = document.getElementById('user-input');
-    
+        const userInput = document.getElementById('user_input');
+
         chatForm.addEventListener('submit', function (e) {
             e.preventDefault();  // Prevents form submission and page reload
             const userMessage = userInput.value.trim();
-    
+
             if (userMessage) {
                 sendMessage(userMessage, false);  // Regular message
             }
-    
+
             userInput.value = '';  // Clear input field
         });
-    
-        // Add listener for the Enter key to send with verbal=True
+
         userInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();  // Prevent default form submission
                 const userMessage = userInput.value.trim();
-    
+
                 if (userMessage) {
                     sendMessage(userMessage, true);  // Send message with verbal=True
                 }
-    
+
                 userInput.value = '';  // Clear input field
             }
         });
-    
+
         function sendMessage(message, verbal) {
             addMessage('user', message);  // Add user's message to the chat box
-    
+
             // Send the message to the server with the 'verbal' flag
-            fetch('/get_response', {
+            fetch('/chat', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: JSON.stringify({ message, verbal })  // Include verbal in request
+                body: `user_input=${encodeURIComponent(message)}`  // URL encode the message
             })
                 .then(response => response.json())
                 .then(data => {
@@ -112,7 +74,7 @@
                     console.error('Error:', error);  // Log error to the console
                 });
         }
-    
+
         function addMessage(sender, message) {
             const messageElement = document.createElement('div');
             messageElement.classList.add('message', sender);
@@ -121,7 +83,8 @@
             chatBox.scrollTop = chatBox.scrollHeight;  // Auto-scroll to the latest message
         }
     </script>
-    
+
+
 </body>
 
 </html>

@@ -5,11 +5,12 @@ import os
 import whisper
 import pyaudio
 import wave
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, jsonify, render_template, request, session, redirect, url_for
 from dotenv import load_dotenv
 from gtts import gTTS
 from pydub import AudioSegment
 from pydub.playback import play
+import sys
 
 app = Flask(__name__)
 load_dotenv()
@@ -153,7 +154,6 @@ def chat():
                 # Check if response exists
                 if 'choices' in completion and len(completion['choices']) > 0:
                     response = completion.choices[0].message['content']
-                    text_to_speech(response)  # Read out the AI's response
                 else:
                     response = "Sorry, I couldn't get a valid response. Please try again."
 
@@ -165,7 +165,9 @@ def chat():
                 print(f"Unexpected error: {str(e)}")  # Log unexpected errors
         else:
             response = random.choice(random_responses)
-            text_to_speech(response)  # Read out the random response
+
+        # Return a JSON response for the frontend to consume
+        return jsonify({"response": response})
 
     return render_template('index.html', response=response)
 
@@ -221,6 +223,35 @@ def voice_interaction():
             os._exit(0)  # Close the Flask application
         elif "another question" in decision:
             continue  # Repeat the loop to ask another question
+
+
+@app.route('/get_response', methods=['POST'])
+def get_response():
+    try:
+        data = request.get_json()  # Get the data from the frontend
+        user_message = data.get("message")
+        verbal = data.get("verbal")
+
+        # You can add logic for handling the verbal flag, for now just use OpenAI's API
+        if USE_OPENAI:
+            completion = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": user_message}]
+            )
+
+            # Check if response exists
+            if 'choices' in completion and len(completion['choices']) > 0:
+                response = completion.choices[0].message['content']
+            else:
+                response = "Sorry, I couldn't get a valid response. Please try again."
+        else:
+            response = "This is a fallback response."
+
+        # Return the response back to the frontend
+        return jsonify({"response": response})
+    except Exception as e:
+        print(f"Error in /get_response: {str(e)}")
+        return jsonify({"response": "Error: Unable to get response."})
 
 
 # Function to handle recording, transcription, confirmation, and sending to the model
