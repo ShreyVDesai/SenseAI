@@ -38,6 +38,7 @@ def record_audio_while_space():
 
     print("Hold the spacebar to record...")
     frames = []
+    
 
     while keyboard.is_pressed("space"):
         data = stream.read(CHUNK)
@@ -96,10 +97,10 @@ def text_to_speech(text):
 
 def ask_for_mode(max_retries=3):
     retries = 0
-
-    while retries < max_retries:
-        text_to_speech(
+    text_to_speech(
             "Would you like to use voice mode or text mode? Please say 'voice' or 'text'. When you're ready, press space and speak.")
+    while retries < max_retries:
+        
 
         # Record the user's response to the question
         response = rerecorder()
@@ -184,7 +185,7 @@ def voice_interaction():
         transcribed_text = rerecorder()
 
         text_to_speech(f"You have confirmed. Your request is being processed.")
-        user_input = f"Describe the following in terms of its visual components. Be descriptive, but sensitive to the user's condition. The topic: {transcribed_text}"
+        user_input = f"Describe the following to a visually impaired person. Be descriptive, but sensitive to the user's condition and don't describe it terms of other visual imagery. Describe it in terms of the feelings that it evokes. The topic: {transcribed_text}"
 
         if USE_OPENAI:
             try:
@@ -259,6 +260,7 @@ def get_response():
 
 def rerecorder():
     # text_to_speech("Recording... Speak now.")
+    time.sleep(1)
     record_audio_while_space()
 
     # Transcribe the audio
@@ -269,19 +271,27 @@ def rerecorder():
         f"You said: {transcribed_text}. Press space to rerecord or wait 3 seconds to confirm.")
 
     start_time = time.time()
-    confirmed = False
-
-    while time.time() - start_time < 3:  # Wait for 3 seconds to confirm
+    # confirmed = False
+    time.sleep(0.1)
+    while True:  # Wait for 3 seconds to confirm
+        if time.time() - start_time>3:
+            text_to_speech(f"I heard: {transcribed_text}.")
+            return transcribed_text
         if keyboard.is_pressed("space"):  # If space is pressed, rerecord
-            text_to_speech("Rerecording... Speak now.")
-            return rerecorder()  # Rerecord if space is pressed
+            text_to_speech("recording... Speak now.")
+            time.sleep(0.1)
+            record_audio_while_space()
+            transcribed_text = speech_to_text()  # Rerecord if space is pressed
+            start_time = time.time()
+            
+    
 
     # If no space press, confirm the transcribed text
-    confirmed = True
+    # confirmed = True
 
-    if confirmed:
-        text_to_speech(f"Confirmed: {transcribed_text}.")
-        return transcribed_text
+    # if confirmed:
+    #     text_to_speech(f"Confirmed: {transcribed_text}.")
+    #     return transcribed_text
 
 
 if __name__ == '__main__':
