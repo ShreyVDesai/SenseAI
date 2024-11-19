@@ -1,3 +1,4 @@
+import threading
 import time
 import openai
 import keyboard
@@ -174,57 +175,98 @@ def chat():
     return render_template('index.html', response=response)
 
 
-# Function to handle verbal interaction (voice mode)
-@app.route('/voice_interaction', methods=['GET', 'POST'])
+# # Function to handle verbal interaction (voice mode)
+# @app.route('/voice_interaction', methods=['GET', 'POST'])
+# def voice_interaction():
+#     while True:
+#         text_to_speech("Press and hold the spacebar to record.")
+#         while not keyboard.is_pressed("space"):
+#             time.sleep(0.1)
+
+#         # Record audio while spacebar is pressed
+#         transcribed_text = rerecorder()
+
+#         text_to_speech(f"You have confirmed. Your request is being processed.")
+#         user_input = f"Describe the following to a visually impaired person. Be descriptive, but sensitive to the user's condition and don't describe it terms of other visual imagery. Describe it in terms of the feelings that it evokes. The topic: {transcribed_text}"
+
+#         if USE_OPENAI:
+#             try:
+#                 print(f"Making request to OpenAI with input: {user_input}")
+
+#                 completion = openai.ChatCompletion.create(
+#                     model="gpt-3.5-turbo",
+#                     messages=[{"role": "user", "content": user_input}]
+#                 )
+
+#                 # Check if response exists
+#                 if 'choices' in completion and len(completion['choices']) > 0:
+#                     response = completion.choices[0].message['content']
+#                 else:
+#                     response = "Sorry, I couldn't get a valid response. Please try again."
+
+#             except openai.error.OpenAIError as e:
+#                 response = f"OpenAI API Error: {str(e)}"
+#                 print(f"OpenAI API Error: {str(e)}")  # Detailed error logging
+#             except Exception as e:
+#                 response = f"An unexpected error occurred: {str(e)}"
+#                 print(f"Unexpected error: {str(e)}")  # Log unexpected errors
+
+#         print("Response from OpenAI:", response)
+#         text_to_speech(f"Here is the response: {response}")
+
+#         # Ask if the user has another question or wants to quit
+#         text_to_speech(
+#             "Do you have another question or do you want to quit? Say 'another question' or 'quit'.")
+
+#         # Record the user's decision
+#         decision = rerecorder().lower()
+
+#         if "quit" in decision:
+#             text_to_speech("Goodbye!")
+#             os._exit(0)  # Close the Flask application
+#         elif "another question" in decision:
+#             continue  # Repeat the loop to ask another question
+
+@app.route('/voice_interaction', methods=['GET'])
 def voice_interaction():
-    while True:
-        text_to_speech("Press and hold the spacebar to record.")
-        while not keyboard.is_pressed("space"):
-            time.sleep(0.1)
+    # Render a simple page to indicate voice mode is active
+    def generate_response():
+        while True:
+            text_to_speech("Press and hold the spacebar to record.")
 
-        # Record audio while spacebar is pressed
-        transcribed_text = rerecorder()
+            # Wait for spacebar press
+            while not keyboard.is_pressed("space"):
+                time.sleep(0.1)
 
-        text_to_speech(f"You have confirmed. Your request is being processed.")
-        user_input = f"Describe the following to a visually impaired person. Be descriptive, but sensitive to the user's condition and don't describe it terms of other visual imagery. Describe it in terms of the feelings that it evokes. The topic: {transcribed_text}"
+            transcribed_text = rerecorder()
+            text_to_speech("Processing your request.")
 
-        if USE_OPENAI:
-            try:
-                print(f"Making request to OpenAI with input: {user_input}")
+            user_input = f"Describe the following: {transcribed_text}"
 
-                completion = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[{"role": "user", "content": user_input}]
-                )
-
-                # Check if response exists
-                if 'choices' in completion and len(completion['choices']) > 0:
+            response = "Placeholder response"
+            if USE_OPENAI:
+                try:
+                    completion = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{"role": "user", "content": user_input}]
+                    )
                     response = completion.choices[0].message['content']
-                else:
-                    response = "Sorry, I couldn't get a valid response. Please try again."
+                except Exception as e:
+                    response = f"Error: {e}"
 
-            except openai.error.OpenAIError as e:
-                response = f"OpenAI API Error: {str(e)}"
-                print(f"OpenAI API Error: {str(e)}")  # Detailed error logging
-            except Exception as e:
-                response = f"An unexpected error occurred: {str(e)}"
-                print(f"Unexpected error: {str(e)}")  # Log unexpected errors
+            text_to_speech(response)
 
-        print("Response from OpenAI:", response)
-        text_to_speech(f"Here is the response: {response}")
+            # Check if the user wants to quit
+            text_to_speech("Do you want to ask another question or quit?")
+            decision = rerecorder().lower()
+            if "quit" in decision:
+                text_to_speech("Goodbye!")
+                os._exit(0)
 
-        # Ask if the user has another question or wants to quit
-        text_to_speech(
-            "Do you have another question or do you want to quit? Say 'another question' or 'quit'.")
+    # Run the interaction loop in a background thread
+    threading.Thread(target=generate_response).start()
 
-        # Record the user's decision
-        decision = rerecorder().lower()
-
-        if "quit" in decision:
-            text_to_speech("Goodbye!")
-            os._exit(0)  # Close the Flask application
-        elif "another question" in decision:
-            continue  # Repeat the loop to ask another question
+    return render_template('voice_mode.html')
 
 
 @app.route('/get_response', methods=['POST'])
