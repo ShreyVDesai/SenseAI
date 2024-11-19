@@ -165,8 +165,7 @@ def chat():
             except Exception as e:
                 response = f"An unexpected error occurred: {str(e)}"
                 print(f"Unexpected error: {str(e)}")  # Log unexpected errors
-        else:
-            response = random.choice(random_responses)
+        
 
         # Return a JSON response for the frontend to consume
         return jsonify({"response": response})
