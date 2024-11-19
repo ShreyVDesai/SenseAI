@@ -38,7 +38,6 @@ def record_audio_while_space():
 
     print("Hold the spacebar to record...")
     frames = []
-    
 
     while keyboard.is_pressed("space"):
         data = stream.read(CHUNK)
@@ -98,9 +97,8 @@ def text_to_speech(text):
 def ask_for_mode(max_retries=3):
     retries = 0
     text_to_speech(
-            "Would you like to use voice mode or text mode? Please say 'voice' or 'text'. When you're ready, press space and speak.")
+        "Would you like to use voice mode or text mode? Please say 'voice' or 'text'. When you're ready, press space and speak.")
     while retries < max_retries:
-        
 
         # Record the user's response to the question
         response = rerecorder()
@@ -119,16 +117,19 @@ def ask_for_mode(max_retries=3):
     return "text"
 
 
+# @app.route('/', methods=['GET', 'POST'])
+# def start():
+#     # Ask the user for the mode (voice or text)
+#     mode = ask_for_mode()
+
+#     # Redirect to the appropriate flow based on the mode
+#     if mode == "voice":
+#         return redirect(url_for('voice_interaction'))
+#     else:
+#         return redirect(url_for('chat'))
 @app.route('/', methods=['GET', 'POST'])
 def start():
-    # Ask the user for the mode (voice or text)
-    mode = ask_for_mode()
-
-    # Redirect to the appropriate flow based on the mode
-    if mode == "voice":
-        return redirect(url_for('voice_interaction'))
-    else:
-        return redirect(url_for('chat'))
+    return render_template('mode_selection.html')
 
 # Main route for the chat interface (text-based mode)
 
@@ -274,7 +275,7 @@ def rerecorder():
     # confirmed = False
     time.sleep(0.1)
     while True:  # Wait for 3 seconds to confirm
-        if time.time() - start_time>3:
+        if time.time() - start_time > 3:
             text_to_speech(f"I heard: {transcribed_text}.")
             return transcribed_text
         if keyboard.is_pressed("space"):  # If space is pressed, rerecord
@@ -283,8 +284,6 @@ def rerecorder():
             record_audio_while_space()
             transcribed_text = speech_to_text()  # Rerecord if space is pressed
             start_time = time.time()
-            
-    
 
     # If no space press, confirm the transcribed text
     # confirmed = True
