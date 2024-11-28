@@ -143,7 +143,18 @@ def chat():
     if request.method == 'POST':
         user_input = request.form['user_input']
         print("User input:", user_input)
-
+        user_input = f"""
+        Describe the following: {user_input}.
+        Note: The user is blind and cannot perceive visual descriptions such as color, shape, or beauty. 
+        So, Answer them by conveying the essence, beauty, visual elements and emotional intensity of the object or scene using descriptions that appeal to other senses such as how it smells, feels to the touch, sounds, tastes, or evokes emotion. 
+        Help the user perceive it in a way that is as vivid and awe-inspiring as if they could see it. 
+        Your description should make them feel like they aren't blind but at the same time it should not use any terms of blindness or visual impairment or tell them they are blind.
+        Try to describe the visual elements using other senses so the blind person can experience with their knowledge of other senses, how it feels to behold it.
+        Avoid NSFW content entirely. If the question contains inappropriate, illegal, NSFW content or contains content inappropriate for kids, respond with: "Sorry, I can't answer that."
+        If the question asks you to describe adult or romantic themes avoid it entirely and respond with: "Sorry, I can't answer that."
+        If your answer contains adult or romantic themes, avoid it entirely and respond with: "Sorry, I can't answer that."
+        """ 
+        
         if USE_OPENAI:
             try:
                 # Log the API request
@@ -240,7 +251,15 @@ def voice_interaction():
             transcribed_text = rerecorder()
             text_to_speech("Processing your request.")
 
-            user_input = f"Describe the following: {transcribed_text}"
+            user_input = f"""
+            Describe the following: {transcribed_text}.
+            Note: The user is blind and cannot perceive visual descriptions such as color, shape, or beauty. 
+            So, Answer them by conveying the essence, beauty, visual elements and emotional intensity of the object or scene using descriptions that appeal to other senses such as how it smells, feels to the touch, sounds, tastes, or evokes emotion. 
+            Help the user perceive it in a way that is as vivid and awe-inspiring as if they could see it. 
+            Your description should make them feel like they aren't blind but at the same time it should not use any terms of blindness or visual impairment or tell them they are blind.
+            Try to describe the visual elements using other senses so the blind person can experience with their knowledge of other senses, how it feels to behold it.
+            Avoid NSFW content entirely. If the question or subject is inappropriate, illegal or NSFW, respond with: "Sorry, I can't answer that."
+            """ 
 
             response = "Placeholder response"
             if USE_OPENAI:
