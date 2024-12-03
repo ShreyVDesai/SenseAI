@@ -14,22 +14,18 @@
 
 <body>
     <div id="theme-toggle">
-        <label for="theme-selector" class="me-2">Select Theme:</label>
-        <select id="theme-selector">
-            <option value="default">Default</option>
-            <option value="protanopia">Protanopia</option>
-            <option value="deuteranopia">Deuteranopia</option>
-            <option value="tritanopia">Tritanopia</option>
-            <option value="achromatopsia">Achromatopsia</option>
-        </select>
+        <button id="theme-toggle-button" class="btn-theme">
+            🌈 Theme
+        </button>
+        <span id="current-theme" class="current-theme">Default</span>
     </div>
     
     
     
     <div class="container">
         <h1>Select Interaction Mode</h1>
-        <button class="btn btn-voice mb-3" onclick="location.href='/voice_interaction'">Voice Mode</button>
-        <button class="btn btn-text" onclick="location.href='/chat'">Text Mode</button>
+        <button class="btn btn-voice mb-3 btn-home" onclick="location.href='/voice_interaction'">Voice Mode</button>
+        <button class="btn btn-text " onclick="location.href='/chat'">Text Mode</button>
     </div>
 
     <div id="home-button">
@@ -38,31 +34,36 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const themeSelector = document.getElementById('theme-selector');
+            const themes = ['default', 'protanopia', 'deuteranopia', 'tritanopia', 'achromatopsia'];
+            let currentThemeIndex = 0;
 
-            themeSelector.addEventListener('change', () => {
-                const selectedTheme = themeSelector.value;
+            const themeToggleButton = document.getElementById('theme-toggle-button');
+            const currentThemeText = document.getElementById('current-theme');
 
-                // Remove only theme-related classes, preserving layout-related classes
-                document.body.classList.remove('theme-default', 'theme-protanopia', 'theme-deuteranopia', 'theme-tritanopia', 'theme-achromatopsia');
-
-                // Apply the selected theme class if it's not the default
-                if (selectedTheme !== 'default') {
-                    document.body.classList.add(`theme-${selectedTheme}`);
+            // Function to apply the selected theme
+            const applyTheme = (theme) => {
+                // Remove all theme-related classes
+                document.body.className = '';
+                if (theme !== 'default') {
+                    document.body.classList.add(`theme-${theme}`);
                 }
+                // Update the displayed current theme
+                currentThemeText.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+                // Save the current theme to localStorage
+                localStorage.setItem('theme', theme);
+            };
 
-                // Save the selected theme to localStorage
-                localStorage.setItem('theme', selectedTheme);
+            // Event listener for the toggle button
+            themeToggleButton.addEventListener('click', () => {
+                currentThemeIndex = (currentThemeIndex + 1) % themes.length; // Cycle through themes
+                applyTheme(themes[currentThemeIndex]);
             });
 
             // Restore the saved theme on page load
             const savedTheme = localStorage.getItem('theme') || 'default';
-            if (savedTheme !== 'default') {
-                document.body.classList.add(`theme-${savedTheme}`);
-            }
-            themeSelector.value = savedTheme;
+            currentThemeIndex = themes.indexOf(savedTheme);
+            applyTheme(savedTheme);
         });
-
     </script>
 </body>
 

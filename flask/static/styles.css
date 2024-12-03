@@ -8,28 +8,28 @@
 
 .theme-protanopia {
     --background-color: #000000;
-    --text-color: #ffffff;
+    --text-color: #eaeaea;
     --accent-color: #d2691e; /* Brownish-orange */
     --secondary-color: #4b0082; /* Indigo */
 }
 
 .theme-deuteranopia {
     --background-color: #1e1e1e;
-    --text-color: #dcdcdc;
+    --text-color: #e4e4e4;
     --accent-color: #4682b4; /* Steel blue */
     --secondary-color: #32cd32; /* Lime green */
 }
 
 .theme-tritanopia {
     --background-color: #121212;
-    --text-color: #eeeeee;
+    --text-color: #f8f8f8;
     --accent-color: #7fffd4; /* Aquamarine */
     --secondary-color: #ff6347; /* Tomato */
 }
 
 .theme-achromatopsia {
     --background-color: #f0f0f0;
-    --text-color: #000000;
+    --text-color: #1a1a1a;
     --accent-color: #808080; /* Gray */
     --secondary-color: #d3d3d3; /* Light gray */
 }
@@ -43,8 +43,9 @@ body {
     margin: 0;
     padding: 10px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: center;
+    align-items: center;    
     height: 100vh;
 }
 
@@ -225,6 +226,7 @@ p {
 }
 
 #theme-toggle {
+    width: 160px;
     position: fixed; /* Fixes the position on the screen */
     top: 10px;       /* Positions it 10px from the top */
     right: 10px;     /* Positions it 10px from the right */
@@ -233,6 +235,36 @@ p {
     border: 2px solid var(--accent-color); /* Optional: Add a border */
     border-radius: 5px; /* Optional: Rounded corners */
     padding: 5px 10px; /* Optional: Spacing around the content */
+    gap: 10px;
+    justify-content: center; /* Horizontally centers contents */
+    align-items: center; /* Vertically aligns contents */
+}
+
+.btn-theme {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    padding: 5px 10px;
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    gap: 10px;
+}
+
+.btn-theme:hover {
+    background-color: var(--secondary-color);
+    color: var(--accent-color);
+}
+
+/* Current theme text */
+.current-theme {
+    font-size: 1em;
+    color: var(--accent-color);
+    font-weight: bold;
 }
 
 #home-button {
