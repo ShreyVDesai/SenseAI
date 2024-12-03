@@ -247,6 +247,7 @@ p {
     font-size: 1.2em;
     padding: 5px 10px;
     background-color: var(--accent-color);
+    border: 2px solid var(--accent-color);
     color: var(--text-color);
     border: none;
     border-radius: 5px;
