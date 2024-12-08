@@ -18,7 +18,7 @@ An audio descriptive tool for vision impaired users
    ```
 
 3. **Run the Flask app:**
-   Start the Flask app by running:
+   Make sure to give relative paths where ever necessary or cd into the flask directory. Start the Flask app by running:
    ```
    python app.py
    ```
