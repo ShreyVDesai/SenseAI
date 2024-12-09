@@ -26,3 +26,11 @@ An audio descriptive tool for vision impaired users
 4. **Access the app:**
    Open your browser and go to `http://127.0.0.1:5000/` to use the application.
 
+
+
+
+
+
+
+#### Demo Video : https://drive.google.com/file/d/1da59YkdLtoZcvnwteKML9adZfh81bhhZ/view?usp=sharing
+#### Presentation slides : https://drive.google.com/file/d/1Be1EafTmy_lMUzvsylBh9Qn7TIgM9ImQ/view?usp=sharing
