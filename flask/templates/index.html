@@ -1,81 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot Interface - SenseAI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <meta name="description" content="Accessible chatbot interface for blind and low vision users.">
-</head>
-
-<body>
-                                
-
-    <script>
-        const chatBox = document.getElementById('chat-box');
-        const chatForm = document.getElementById('chat-form');
-        const userInput = document.getElementById('user_input');
-
-        chatForm.addEventListener('submit', function (e) {
-            e.preventDefault();  // Prevents form submission and page reload
-            const userMessage = userInput.value.trim();
-
-            if (userMessage) {
-                sendMessage(userMessage, false);  // Regular message
-            }
-
-            userInput.value = '';  // Clear input field
-        });
-
-        userInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();  // Prevent default form submission
-                const userMessage = userInput.value.trim();
-
-                if (userMessage) {
-                    sendMessage(userMessage, true);  // Send message with verbal=True
-                }
-
-                userInput.value = '';  // Clear input field
-            }
-        });
-
-        function sendMessage(message, verbal) {
-            addMessage('user', message);  // Add user's message to the chat box
-
-            // Send the message to the server with the 'verbal' flag
-            fetch('/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `user_input=${encodeURIComponent(message)}`  // URL encode the message
-            })
-                .then(response => response.json())
-                .then(data => {
-                    addMessage('bot', data.response);  // Add bot's response to chat
-                })
-                .catch(error => {
-                    addMessage('bot', 'Error: Unable to get response.');
-                    console.error('Error:', error);  // Log error to the console
-                });
-        }
-
-        function addMessage(sender, message) {
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message', sender);
-            messageElement.textContent = message;
-            chatBox.appendChild(messageElement);
-            chatBox.scrollTop = chatBox.scrollHeight;  // Auto-scroll to the latest message
-        }
-    </script>
-
-
-</body>
-
-</html> -->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -86,8 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../static/styles.css">
     <meta name="description" content="Accessible chatbot interface for blind and low vision users.">
-    
-    
+
+
 </head>
 
 <body class="container py-5">
@@ -102,8 +24,8 @@
         </button>
         <span id="current-theme" class="current-theme">Default</span>
     </div>
-    
-    
+
+
 
     <div class="mb-3">
         <div id="chat-box" class="mb-3" role="region" aria-live="polite" aria-relevant="additions">
@@ -116,7 +38,8 @@
     </div>
 
     <form id="chat-form" class="d-flex align-items-center">
-        <input id="user_input" type="text" class="form-control me-2" placeholder="Type your message here..." aria-label="Type your message">
+        <input id="user_input" type="text" class="form-control me-2" placeholder="Type your message here..."
+            aria-label="Type your message">
         <button type="submit" class="btn btn-primary btn-home">Send</button>
     </form>
 

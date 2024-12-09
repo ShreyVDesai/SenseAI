@@ -6,7 +6,11 @@ from playsound import playsound
 from pydub import AudioSegment
 from pydub.playback import play
 
+
 def text_to_speech(text):
+    """
+    Convert text to speech using gTTS and play it using pydub.
+    """
     print("Converting text to speech...")
     tts = gTTS(text=text, lang='en')
     tts.save("output_audio.mp3")
@@ -28,7 +32,12 @@ WAVE_OUTPUT_FILENAME = "recorded_audio.wav"
 whisper_model = whisper.load_model("base")
 
 # Function to record audio
+
+
 def record_audio():
+    """
+    Record audio for a fixed duration and save it as a WAV file.
+    """
     audio = pyaudio.PyAudio()
     stream = audio.open(format=FORMAT, channels=CHANNELS,
                         rate=RATE, input=True,
@@ -56,23 +65,25 @@ def record_audio():
     wf.close()
 
 # Function to convert speech to text using Whisper
+
+
 def speech_to_text():
+    """
+    Convert recorded audio to text using Whisper.
+    """
     print("Converting speech to text...")
     result = whisper_model.transcribe(WAVE_OUTPUT_FILENAME)
     text = result["text"]
     print("Transcribed text:", text)
     return text
 
-# # Function to convert text to speech using gTTS
-# def text_to_speech(text):
-#     print("Converting text to speech...")
-#     tts = gTTS(text=text, lang='en')
-#     tts.save("output_audio.mp3")
-#     playsound("output_audio.mp3")
-#     print("Text-to-speech playback completed.")
-
 # Main function to run the STT and TTS process
+
+
 def main():
+    """
+    Main function to record audio, convert it to text, and play it back as speech.
+    """
     # Step 1: Record audio
     record_audio()
 
@@ -81,6 +92,7 @@ def main():
 
     # Step 3: Convert text back to speech
     text_to_speech(transcribed_text)
+
 
 if __name__ == "__main__":
     main()

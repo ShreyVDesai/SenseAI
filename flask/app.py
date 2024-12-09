@@ -1,3 +1,12 @@
+"""
+Voice and Text-Based Conversational AI Application
+
+This Flask-based application allows users to interact with an AI model using either text-based or voice-based input.
+The application supports recording audio, converting it to text using Whisper, and generating AI-driven responses.
+It also features text-to-speech playback for visually-impaired users, aiming to provide a sensory-rich experience.
+"""
+
+
 import threading
 import time
 import openai
@@ -13,9 +22,11 @@ from pydub import AudioSegment
 from pydub.playback import play
 import sys
 
+# Initialize Flask app and load environment variables
 app = Flask(__name__)
 load_dotenv()
 
+# Set OpenAI API key and app secret key
 openai.api_key = os.getenv("OPENAI_API_KEY")
 app.secret_key = 'abcdefg'
 
@@ -28,10 +39,12 @@ WAVE_OUTPUT_FILENAME = "recorded_audio.wav"
 whisper_model = whisper.load_model("base")
 USE_OPENAI = True  # Switch to OpenAI API mode
 
-# Function to record audio while spacebar is pressed
-
 
 def record_audio_while_space():
+    """
+    Record audio while the spacebar is pressed and save it to a .wav file.
+
+    Uses PyAudio for real-time audio recording. """
     audio = pyaudio.PyAudio()
     stream = audio.open(format=FORMAT, channels=CHANNELS,
                         rate=RATE, input=True,
@@ -56,20 +69,28 @@ def record_audio_while_space():
     wf.writeframes(b''.join(frames))
     wf.close()
 
-# Function to convert speech to text using Whisper
-
 
 def speech_to_text():
+    """
+    Convert the recorded audio to text using the Whisper model.
+
+    Returns:
+        str: Transcribed text from the audio.
+    """
     print("Converting speech to text...")
     result = whisper_model.transcribe(WAVE_OUTPUT_FILENAME)
     text = result["text"]
     print("Transcribed text:", text)
     return text
 
-# Function to convert text to speech using gTTS
-
 
 def text_to_speech(text):
+    """
+    Convert text to speech using gTTS and play it using pydub.
+
+    Args:
+        text (str): The text to be converted to speech.
+    """
     output_file = "output_audio.mp3"
     try:
         print("Converting text to speech...")
@@ -92,10 +113,17 @@ def text_to_speech(text):
                 except Exception as e:
                     print(f"Failed to delete {file}: {e}")
 
-# Initial voice prompt asking user if they want to use voice or text mode
-
 
 def ask_for_mode(max_retries=3):
+    """
+    Prompt the user to select between 'voice' or 'text' mode.
+
+    Args:
+        max_retries (int): Maximum number of retries for valid input.
+
+    Returns:
+        str: Selected mode ('voice' or 'text').
+    """
     retries = 0
     text_to_speech(
         "Would you like to use voice mode or text mode? Please say 'voice' or 'text'. When you're ready, press space and speak.")
@@ -118,27 +146,25 @@ def ask_for_mode(max_retries=3):
     return "text"
 
 
-# @app.route('/', methods=['GET', 'POST'])
-# def start():
-#     # Ask the user for the mode (voice or text)
-#     mode = ask_for_mode()
-
-#     # Redirect to the appropriate flow based on the mode
-#     if mode == "voice":
-#         return redirect(url_for('voice_interaction'))
-#     else:
-#         return redirect(url_for('chat'))
 @app.route('/', methods=['GET', 'POST'])
 def start():
-    return render_template('mode_selection.html')
+    """
+    Render the mode selection page.
 
-# Main route for the chat interface (text-based mode)
+    Returns:
+        Template: HTML template for mode selection.
+    """
+    return render_template('mode_selection.html')
 
 
 @app.route('/chat', methods=['GET', 'POST'])
 def chat():
+    """
+    Handle text-based chat interactions with the AI model.
 
-    # Ensure session has a place for conversation history
+    Uses OpenAI's GPT-3.5 Turbo for generating responses.
+    """
+
     if 'conversation_history' not in session:
         session['conversation_history'] = []
     # session.clear()
@@ -157,11 +183,12 @@ def chat():
         Avoid NSFW content entirely. If the question contains illegal, NSFW content or contains content not for kids, respond with: "Sorry, I can't answer that."
         If the question asks you to describe adult or romantic themes avoid it entirely and respond with: "Sorry, I can't answer that."
         If your answer contains adult or romantic themes, avoid it entirely and respond with: "Sorry, I can't answer that."
-        """ 
+        """
 
         # Append user's input to conversation history
-        session['conversation_history'].append({"role": "user", "content": user_input})
-        
+        session['conversation_history'].append(
+            {"role": "user", "content": user_input})
+
         if USE_OPENAI:
             try:
                 # Log the API request
@@ -177,9 +204,10 @@ def chat():
                     response = completion.choices[0].message['content']
                 else:
                     response = "Sorry, I couldn't get a valid response. Please try again."
-                
+
                 # Append the bot's response to conversation history
-                session['conversation_history'].append({"role": "assistant", "content": response})
+                session['conversation_history'].append(
+                    {"role": "assistant", "content": response})
 
             except openai.error.OpenAIError as e:
                 response = f"OpenAI API Error: {str(e)}"
@@ -187,74 +215,35 @@ def chat():
             except Exception as e:
                 response = f"An unexpected error occurred: {str(e)}"
                 print(f"Unexpected error: {str(e)}")  # Log unexpected errors
-   
+
         # Return a JSON response for the frontend to consume
         return jsonify({"response": response})
 
     return render_template('index.html', response=response)
 
 # Clear conversation history route
+
+
 @app.route('/clear', methods=['POST'])
 def clear_history():
+    """
+    Clear the conversation history stored in the session.
+
+    Returns:
+        JSON: Confirmation message.
+    """
     session.pop('conversation_history', None)
     return jsonify({"message": "Conversation history cleared."})
 
 
-# # Function to handle verbal interaction (voice mode)
-# @app.route('/voice_interaction', methods=['GET', 'POST'])
-# def voice_interaction():
-#     while True:
-#         text_to_speech("Press and hold the spacebar to record.")
-#         while not keyboard.is_pressed("space"):
-#             time.sleep(0.1)
-
-#         # Record audio while spacebar is pressed
-#         transcribed_text = rerecorder()
-
-#         text_to_speech(f"You have confirmed. Your request is being processed.")
-#         user_input = f"Describe the following to a visually impaired person. Be descriptive, but sensitive to the user's condition and don't describe it terms of other visual imagery. Describe it in terms of the feelings that it evokes. The topic: {transcribed_text}"
-
-#         if USE_OPENAI:
-#             try:
-#                 print(f"Making request to OpenAI with input: {user_input}")
-
-#                 completion = openai.ChatCompletion.create(
-#                     model="gpt-3.5-turbo",
-#                     messages=[{"role": "user", "content": user_input}]
-#                 )
-
-#                 # Check if response exists
-#                 if 'choices' in completion and len(completion['choices']) > 0:
-#                     response = completion.choices[0].message['content']
-#                 else:
-#                     response = "Sorry, I couldn't get a valid response. Please try again."
-
-#             except openai.error.OpenAIError as e:
-#                 response = f"OpenAI API Error: {str(e)}"
-#                 print(f"OpenAI API Error: {str(e)}")  # Detailed error logging
-#             except Exception as e:
-#                 response = f"An unexpected error occurred: {str(e)}"
-#                 print(f"Unexpected error: {str(e)}")  # Log unexpected errors
-
-#         print("Response from OpenAI:", response)
-#         text_to_speech(f"Here is the response: {response}")
-
-#         # Ask if the user has another question or wants to quit
-#         text_to_speech(
-#             "Do you have another question or do you want to quit? Say 'another question' or 'quit'.")
-
-#         # Record the user's decision
-#         decision = rerecorder().lower()
-
-#         if "quit" in decision:
-#             text_to_speech("Goodbye!")
-#             os._exit(0)  # Close the Flask application
-#         elif "another question" in decision:
-#             continue  # Repeat the loop to ask another question
-
 @app.route('/voice_interaction', methods=['GET'])
 def voice_interaction():
-    # Render a simple page to indicate voice mode is active
+    """
+    Activate the voice-based interaction mode.
+
+    Returns:
+        Template: HTML template for voice interaction.
+    """
     def generate_response():
         while True:
             text_to_speech("Press and hold the spacebar to record.")
@@ -274,7 +263,7 @@ def voice_interaction():
             Your description should make them feel like they aren't blind but at the same time it should not use any terms of blindness or visual impairment or tell them they are blind.
             Try to describe the visual elements using other senses so the blind person can experience with their knowledge of other senses, how it feels to behold it.
             Avoid NSFW content entirely. If the question or subject is inappropriate, illegal or NSFW, respond with: "Sorry, I can't answer that."
-            """ 
+            """
 
             response = "Placeholder response"
             if USE_OPENAI:
@@ -335,7 +324,12 @@ def get_response():
 
 
 def rerecorder():
-    # text_to_speech("Recording... Speak now.")
+    """
+    Record and confirm audio input, converting it to text.
+
+    Returns:
+        str: Confirmed transcribed text from the recording.
+    """
     time.sleep(1)
     record_audio_while_space()
 
@@ -347,7 +341,7 @@ def rerecorder():
         f"You said: {transcribed_text}. Press space to rerecord or wait 3 seconds to confirm.")
 
     start_time = time.time()
-    # confirmed = False
+
     time.sleep(0.1)
     while True:  # Wait for 3 seconds to confirm
         if time.time() - start_time > 3:
@@ -359,13 +353,6 @@ def rerecorder():
             record_audio_while_space()
             transcribed_text = speech_to_text()  # Rerecord if space is pressed
             start_time = time.time()
-
-    # If no space press, confirm the transcribed text
-    # confirmed = True
-
-    # if confirmed:
-    #     text_to_speech(f"Confirmed: {transcribed_text}.")
-    #     return transcribed_text
 
 
 if __name__ == '__main__':
